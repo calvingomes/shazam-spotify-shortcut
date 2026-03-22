@@ -18,6 +18,7 @@
   });
 
   const data = await response.json();
+  console.log("TOKEN RESPONSE:", JSON.stringify(data));
   return data.access_token;
 }
 

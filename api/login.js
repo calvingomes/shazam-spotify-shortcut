@@ -11,6 +11,7 @@ export default function handler(req, res) {
       client_id,
       scope,
       redirect_uri,
+      show_dialog: 'true',
     });
 
   res.redirect(url);
