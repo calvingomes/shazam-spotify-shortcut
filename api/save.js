@@ -1,4 +1,4 @@
- async function getAccessToken() {
+async function getAccessToken() {
   const response = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
@@ -18,7 +18,6 @@
   });
 
   const data = await response.json();
-  console.log("TOKEN RESPONSE:", JSON.stringify(data));
   return data.access_token;
 }
 
@@ -30,7 +29,9 @@ export default async function handler(req, res) {
     if (!req.body || !req.body.track || !req.body.artist) {
       return res.status(400).json({ error: "Missing 'track' or 'artist' in JSON request body" });
     }
+
     const { track, artist } = req.body;
+    const playlistId = process.env.SPOTIFY_PLAYLIST_ID;
 
     const token = await getAccessToken();
 
@@ -51,37 +52,19 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: "Track not found" });
     }
 
-    // Save track
-    // const saveRes = await fetch("https://api.spotify.com/v1/me/tracks", {
-    //   method: "PUT",
-    //   headers: {
-    //     Authorization: `Bearer ${token}`,
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ ids: [trackId] }),
-    // });
-
-    console.log("TRACK ID:", trackId);
-    console.log("SAVE BODY:", JSON.stringify({ ids: [trackId] }));
-    
-    // Save track
-    const saveRes = await fetch("https://api.spotify.com/v1/me/tracks", {
-      method: "PUT",
+    // Add to playlist
+    const saveRes = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks`, {
+      method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ids: ["1vwkLWNosVDYMDOO2PJHyo"] }), // hardcoded Blinding Lights ID
+      body: JSON.stringify({ uris: [`spotify:track:${trackId}`] }),
     });
-
-    // Add this
-    console.log("SAVE STATUS:", saveRes.status);
-    console.log("SAVE HEADERS:", Object.fromEntries(saveRes.headers.entries()));
-
 
     if (!saveRes.ok) {
       const errorText = await saveRes.text();
-      return res.status(saveRes.status).json({ error: "Failed to save track", details: errorText });
+      return res.status(saveRes.status).json({ error: "Failed to add track to playlist", details: errorText });
     }
 
     res.json({ success: true, trackId });
