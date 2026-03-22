@@ -32,6 +32,10 @@ export default async function handler(req, res) {
     }
   );
 
-  const data = await response.json();
-  res.json({ saved: data[0] });
+  const text = await response.text();
+
+  res.json({
+    status: response.status,
+    raw: text,
+  });
 }
