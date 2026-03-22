@@ -61,6 +61,11 @@ export default async function handler(req, res) {
       body: JSON.stringify({ ids: [trackId] }),
     });
 
+    // Add this
+    console.log("SAVE STATUS:", saveRes.status);
+    console.log("SAVE HEADERS:", Object.fromEntries(saveRes.headers.entries()));
+
+
     if (!saveRes.ok) {
       const errorText = await saveRes.text();
       return res.status(saveRes.status).json({ error: "Failed to save track", details: errorText });
