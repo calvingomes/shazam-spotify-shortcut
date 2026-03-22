@@ -61,6 +61,9 @@ export default async function handler(req, res) {
     //   body: JSON.stringify({ ids: [trackId] }),
     // });
 
+    console.log("TRACK ID:", trackId);
+    console.log("SAVE BODY:", JSON.stringify({ ids: [trackId] }));
+    
     // Save track
     const saveRes = await fetch("https://api.spotify.com/v1/me/tracks", {
       method: "PUT",
