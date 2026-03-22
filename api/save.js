@@ -52,13 +52,23 @@ export default async function handler(req, res) {
     }
 
     // Save track
+    // const saveRes = await fetch("https://api.spotify.com/v1/me/tracks", {
+    //   method: "PUT",
+    //   headers: {
+    //     Authorization: `Bearer ${token}`,
+    //     "Content-Type": "application/json",
+    //   },
+    //   body: JSON.stringify({ ids: [trackId] }),
+    // });
+
+    // Save track
     const saveRes = await fetch("https://api.spotify.com/v1/me/tracks", {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ ids: [trackId] }),
+      body: JSON.stringify({ ids: ["1vwkLWNosVDYMDOO2PJHyo"] }), // hardcoded Blinding Lights ID
     });
 
     // Add this
