@@ -1,4 +1,4 @@
-async function getAccessToken() {
+ async function getAccessToken() {
   const response = await fetch("https://accounts.spotify.com/api/token", {
     method: "POST",
     headers: {
@@ -23,6 +23,12 @@ async function getAccessToken() {
 
 export default async function handler(req, res) {
   try {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: "Method not allowed, must be POST" });
+    }
+    if (!req.body || !req.body.track || !req.body.artist) {
+      return res.status(400).json({ error: "Missing 'track' or 'artist' in JSON request body" });
+    }
     const { track, artist } = req.body;
 
     const token = await getAccessToken();
@@ -30,7 +36,7 @@ export default async function handler(req, res) {
     // Search track
     const searchRes = await fetch(
       `https://api.spotify.com/v1/search?q=${encodeURIComponent(
-        track + " " + artist,
+        `track:${track} artist:${artist}`
       )}&type=track&limit=1`,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -45,7 +51,7 @@ export default async function handler(req, res) {
     }
 
     // Save track
-    await fetch("https://api.spotify.com/v1/me/tracks", {
+    const saveRes = await fetch("https://api.spotify.com/v1/me/tracks", {
       method: "PUT",
       headers: {
         Authorization: `Bearer ${token}`,
@@ -53,6 +59,11 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({ ids: [trackId] }),
     });
+
+    if (!saveRes.ok) {
+      const errorText = await saveRes.text();
+      return res.status(saveRes.status).json({ error: "Failed to save track", details: errorText });
+    }
 
     res.json({ success: true, trackId });
   } catch (err) {
